@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+*.local
+.vercel
+.netlify
+.DS_Store
+*.log
+.claude

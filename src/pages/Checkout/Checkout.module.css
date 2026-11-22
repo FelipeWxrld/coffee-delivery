@@ -1,0 +1,206 @@
+.checkout {
+  display: grid;
+  grid-template-columns: minmax(0, 40rem) minmax(0, 28rem);
+  justify-content: space-between;
+  gap: 2rem;
+  padding-top: 2.5rem;
+  padding-bottom: 5rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.column h2 {
+  font-family: var(--font-title);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-base-subtitle);
+  margin-bottom: 0.25rem;
+}
+
+.card {
+  padding: 2.5rem;
+  border-radius: var(--radius);
+  background: var(--color-base-card);
+}
+
+.cardHeader {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.cardHeader h3 {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-base-subtitle);
+}
+
+.cardHeader p {
+  font-size: 0.875rem;
+  color: var(--color-base-text);
+}
+
+.addressGrid {
+  display: grid;
+  grid-template-columns: 12.5rem 1fr 3.75rem;
+  gap: 1rem 0.75rem;
+}
+
+.cep {
+  grid-column: 1 / 2;
+}
+
+.street {
+  grid-column: 1 / -1;
+}
+
+.number {
+  grid-column: 1 / 2;
+}
+
+.complement {
+  grid-column: 2 / -1;
+}
+
+.neighborhood {
+  grid-column: 1 / 2;
+}
+
+.city {
+  grid-column: 2 / 3;
+}
+
+.uf {
+  grid-column: 3 / 4;
+}
+
+.payments {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.error {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-danger);
+}
+
+.summary {
+  border-radius: 6px 44px;
+}
+
+.items {
+  list-style: none;
+}
+
+.totals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.totals div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.totals dd {
+  font-size: 1rem;
+}
+
+.totals .total {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-base-subtitle);
+}
+
+.totals .total dd {
+  font-size: 1.25rem;
+}
+
+.confirm {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: var(--radius);
+  background: var(--color-yellow);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: background-color 0.2s;
+}
+
+.confirm:not(:disabled):hover {
+  background: var(--color-yellow-dark);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+  text-align: center;
+}
+
+.empty h1 {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  color: var(--color-base-title);
+}
+
+.backButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  background: var(--color-purple-dark);
+  color: var(--color-on-accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 1024px) {
+  .checkout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 1.5rem 1rem;
+  }
+
+  .addressGrid {
+    grid-template-columns: 1fr 4.5rem;
+  }
+
+  .cep,
+  .street,
+  .complement,
+  .neighborhood {
+    grid-column: 1 / -1;
+  }
+
+  .number {
+    grid-column: 1 / -1;
+  }
+
+  .city {
+    grid-column: 1 / 2;
+  }
+
+  .uf {
+    grid-column: 2 / 3;
+  }
+
+  .payments {
+    flex-direction: column;
+  }
+}
