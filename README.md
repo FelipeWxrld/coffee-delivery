@@ -179,7 +179,7 @@ Depois: `npm test`, commit, `git push` e novo deploy. Os testes leem a lista de 
 
 ## 🤖 Uso de Inteligência Artificial
 
-O **Claude Code (Anthropic)** foi usado em todas as fases: planejamento dos SPECs, leitura e comparação com o enunciado e o Figma, implementação em etapas, revisão de acessibilidade e contraste, depuração e testes. Seis interações estão registradas em [docs/AI_USAGE.md](docs/AI_USAGE.md), cada uma com prompt, objetivo, resposta resumida, decisão e evidência. As diretrizes para o agente estão em [AGENTS.md](AGENTS.md).
+O desenvolvimento contou com o apoio do assistente Claude Code (Anthropic), utilizado no planejamento das especificações, na implementação, na criação da identidade visual e das ilustrações, na comparação com as referências (enunciado e Figma), na depuração e nos testes. Todas as sugestões foram revisadas, validadas por testes automatizados e compreendidas pelo autor, que responde pelo resultado final.
 
 ## 👤 Autor
 
