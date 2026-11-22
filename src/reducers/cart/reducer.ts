@@ -1,8 +1,6 @@
-import type { CartItem, Order } from '../../@types/coffee'
+import type { CartItem, Order } from '../../types/coffee'
+import { clampQuantity, MAX_QUANTITY, MIN_QUANTITY } from '../../utils/cart'
 import { ActionTypes, type CartAction } from './actions'
-
-export const MIN_QUANTITY = 1
-export const MAX_QUANTITY = 99
 
 export interface CartState {
   items: CartItem[]
@@ -11,13 +9,12 @@ export interface CartState {
 
 export const initialCartState: CartState = { items: [], lastOrder: null }
 
-const clamp = (value: number) => Math.min(MAX_QUANTITY, Math.max(MIN_QUANTITY, value))
-
 /**
- * Reducer puro do carrinho. Regras de negócio:
- * - adicionar um café já presente soma as quantidades (limitado a MAX_QUANTITY);
- * - a quantidade nunca fica abaixo de 1 (para tirar o item usa-se "Remover");
- * - finalizar o pedido salva o pedido e esvazia o carrinho.
+ * Reducer puro e imutável do carrinho (map/filter/spread; nunca altera o estado recebido).
+ * - RN-01: adição exige quantidade inteira ≥ 1; no carrinho o "−" para em 1
+ *   (para tirar o item usa-se "Remover").
+ * - RN-02: adicionar um café já presente soma a quantidade, sem duplicar linhas.
+ * - RN-06 / RF-13: finalizar guarda o snapshot do pedido e esvazia o carrinho.
  */
 export function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -28,9 +25,9 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       const exists = state.items.some((item) => item.id === id)
       const items = exists
         ? state.items.map((item) =>
-            item.id === id ? { ...item, quantity: clamp(item.quantity + quantity) } : item,
+            item.id === id ? { ...item, quantity: clampQuantity(item.quantity + quantity) } : item,
           )
-        : [...state.items, { id, quantity: clamp(quantity) }]
+        : [...state.items, { id, quantity: clampQuantity(quantity) }]
 
       return { ...state, items }
     }
@@ -39,7 +36,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: state.items.map((item) =>
-          item.id === action.payload.id ? { ...item, quantity: clamp(item.quantity + 1) } : item,
+          item.id === action.payload.id ? { ...item, quantity: clampQuantity(item.quantity + 1) } : item,
         ),
       }
 
@@ -47,7 +44,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: state.items.map((item) =>
-          item.id === action.payload.id ? { ...item, quantity: clamp(item.quantity - 1) } : item,
+          item.id === action.payload.id ? { ...item, quantity: clampQuantity(item.quantity - 1) } : item,
         ),
       }
 
@@ -65,7 +62,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
   }
 }
 
-/** Valida o formato do estado vindo do LocalStorage. */
+/** Valida o formato do estado vindo do LocalStorage (dados corrompidos são descartados). */
 export function isCartState(value: unknown): value is CartState {
   if (typeof value !== 'object' || value === null) return false
   const v = value as Partial<CartState>
@@ -78,6 +75,7 @@ export function isCartState(value: unknown): value is CartState {
         item.quantity >= MIN_QUANTITY &&
         item.quantity <= MAX_QUANTITY,
     ) &&
-    (v.lastOrder === null || typeof v.lastOrder === 'object')
+    (v.lastOrder === null ||
+      (typeof v.lastOrder === 'object' && Array.isArray((v.lastOrder as Order).items)))
   )
 }

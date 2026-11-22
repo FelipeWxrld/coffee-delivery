@@ -1,4 +1,4 @@
-import type { Order } from '../../@types/coffee'
+import type { Order } from '../../types/coffee'
 
 export const ActionTypes = {
   ADD_ITEM: 'ADD_ITEM',

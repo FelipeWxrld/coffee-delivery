@@ -4,7 +4,7 @@ export type CoffeeTag = 'tradicional' | 'gelado' | 'com leite' | 'especial' | 'a
 export interface CoffeeArt {
   liquid: string
   foam?: string
-  /** Desenho na espuma: coração (latte art), pó (cacau/canela) ou nenhum. */
+  /** Desenho na bebida: coração (latte art), pó (cacau/canela), gelo ou nenhum. */
   pattern?: 'heart' | 'dust' | 'ice' | 'none'
   cup?: string
 }
@@ -14,19 +14,20 @@ export interface Coffee {
   name: string
   description: string
   tags: CoffeeTag[]
-  /** Preço em centavos, evitando erros de ponto flutuante. */
+  /** Preço em centavos, evitando erros de ponto flutuante (RN-04). */
   priceInCents: number
   art: CoffeeArt
 }
 
-export type PaymentMethod = 'credit' | 'debit' | 'cash'
-
+/** Item do carrinho: guarda só a referência e a quantidade (o catálogo é a fonte de verdade). */
 export interface CartItem {
   id: string
   quantity: number
 }
 
-export interface Address {
+export type PaymentMethod = 'credit' | 'debit' | 'cash'
+
+export interface DeliveryAddress {
   cep: string
   street: string
   number: string
@@ -36,13 +37,21 @@ export interface Address {
   uf: string
 }
 
+/** Cópia dos dados do produto no momento da compra (snapshot — RN-06). */
+export interface OrderItem {
+  id: string
+  name: string
+  priceInCents: number
+  quantity: number
+}
+
 export interface Order {
   id: string
   createdAt: string
-  address: Address
+  address: DeliveryAddress
   paymentMethod: PaymentMethod
-  items: CartItem[]
-  itemsTotalInCents: number
+  items: OrderItem[]
+  subtotalInCents: number
   deliveryFeeInCents: number
   totalInCents: number
 }

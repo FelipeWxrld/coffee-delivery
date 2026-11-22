@@ -1,4 +1,4 @@
-import type { Coffee } from '../@types/coffee'
+import type { Coffee } from '../types/coffee'
 
 export const coffees: Coffee[] = [
   {

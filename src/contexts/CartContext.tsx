@@ -1,5 +1,5 @@
 import { createContext, useEffect, useMemo, useReducer, type ReactNode } from 'react'
-import type { Address, Coffee, Order, PaymentMethod } from '../@types/coffee'
+import type { Coffee, DeliveryAddress, Order, PaymentMethod } from '../types/coffee'
 import { findCoffee } from '../data/coffees'
 import {
   addItemAction,
@@ -10,9 +10,8 @@ import {
   removeItemAction,
 } from '../reducers/cart/actions'
 import { cartReducer, initialCartState, isCartState, type CartState } from '../reducers/cart/reducer'
+import { calculateDeliveryFee, calculateSubtotal, countUnits } from '../utils/cart'
 import { readStorage, STORAGE_KEYS, writeStorage } from '../utils/storage'
-
-export const DELIVERY_FEE_IN_CENTS = 350
 
 export interface CartItemWithCoffee {
   coffee: Coffee
@@ -21,15 +20,15 @@ export interface CartItemWithCoffee {
 }
 
 export interface CheckoutData {
-  address: Address
+  address: DeliveryAddress
   paymentMethod: PaymentMethod
 }
 
 export interface CartContextValue {
   items: CartItemWithCoffee[]
-  /** Soma das quantidades (badge do carrinho). */
+  /** Soma das unidades (badge do Header — RF-04). */
   totalQuantity: number
-  itemsTotalInCents: number
+  subtotalInCents: number
   deliveryFeeInCents: number
   totalInCents: number
   lastOrder: Order | null
@@ -49,16 +48,16 @@ function createOrderId() {
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
+/** Inicialização preguiçosa: restaura do LocalStorage e descarta cafés inexistentes (RN-10). */
 function loadInitialState(): CartState {
   const stored = readStorage(STORAGE_KEYS.cart, initialCartState, isCartState)
-  // Descarta itens cujo café não existe mais no catálogo.
   return { ...stored, items: stored.items.filter((item) => findCoffee(item.id)) }
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, undefined, loadInitialState)
 
-  // Persistência: toda mudança do estado do carrinho é salva no LocalStorage.
+  // Persistência (RF-06): toda mudança do estado é salva.
   useEffect(() => {
     writeStorage(STORAGE_KEYS.cart, state)
   }, [state])
@@ -71,16 +70,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
         : []
     })
 
-    const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0)
-    const itemsTotalInCents = items.reduce((sum, item) => sum + item.subtotalInCents, 0)
-    const deliveryFeeInCents = items.length > 0 ? DELIVERY_FEE_IN_CENTS : 0
+    const subtotalInCents = calculateSubtotal(items)
+    const deliveryFeeInCents = calculateDeliveryFee(items)
+    const totalInCents = subtotalInCents + deliveryFeeInCents
 
     return {
       items,
-      totalQuantity,
-      itemsTotalInCents,
+      totalQuantity: countUnits(items),
+      subtotalInCents,
       deliveryFeeInCents,
-      totalInCents: itemsTotalInCents + deliveryFeeInCents,
+      totalInCents,
       lastOrder: state.lastOrder,
       addItem: (id, quantity) => dispatch(addItemAction(id, quantity)),
       incrementItem: (id) => dispatch(incrementItemAction(id)),
@@ -88,18 +87,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem: (id) => dispatch(removeItemAction(id)),
       clearCart: () => dispatch(clearCartAction()),
       checkout: ({ address, paymentMethod }) => {
-        if (state.items.length === 0) {
+        if (items.length === 0) {
           throw new Error('Não é possível finalizar um pedido com o carrinho vazio.')
         }
+        // Snapshot independente do carrinho (RN-06): nome e preço copiados no momento da compra.
         const order: Order = {
           id: createOrderId(),
           createdAt: new Date().toISOString(),
           address,
           paymentMethod,
-          items: state.items,
-          itemsTotalInCents,
+          items: items.map(({ coffee, quantity }) => ({
+            id: coffee.id,
+            name: coffee.name,
+            priceInCents: coffee.priceInCents,
+            quantity,
+          })),
+          subtotalInCents,
           deliveryFeeInCents,
-          totalInCents: itemsTotalInCents + deliveryFeeInCents,
+          totalInCents,
         }
         dispatch(checkoutAction(order))
         return order
