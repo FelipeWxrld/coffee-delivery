@@ -1,27 +1,48 @@
-import type { ComponentProps } from 'react'
-import styles from './TextInput.module.css'
+import type { ComponentProps, ReactNode } from 'react'
+import { ErrorMessage, FieldBox, FieldContainer, Hint, OptionalTag } from './styles'
 
 type TextInputProps = ComponentProps<'input'> & {
+  /** Rótulo acessível (visualmente oculto, como no protótipo, que usa placeholders). */
+  label: string
   error?: string
+  hint?: ReactNode
   optional?: boolean
-  containerClassName?: string
+  className?: string
 }
 
-/** Input reutilizável e compatível com `register` do React Hook Form (ref como prop no React 19). */
-export function TextInput({ error, optional, containerClassName, id, ...props }: TextInputProps) {
-  const errorId = error && id ? `${id}-error` : undefined
+/**
+ * Input reutilizável compatível com `register` do React Hook Form
+ * (no React 19 `ref` é recebido como prop comum).
+ */
+export function TextInput({ label, error, hint, optional, className, id, ...props }: TextInputProps) {
+  const messageId = id ? `${id}-message` : undefined
 
   return (
-    <div className={`${styles.field} ${containerClassName ?? ''}`}>
-      <div className={`${styles.box} ${error ? styles.invalid : ''}`}>
-        <input id={id} aria-invalid={!!error} aria-describedby={errorId} {...props} />
-        {optional && <span className={styles.optional}>Opcional</span>}
-      </div>
-      {error && (
-        <p id={errorId} className={styles.error} role="alert">
+    <FieldContainer className={className}>
+      <label htmlFor={id} className="sr-only">
+        {label}
+        {optional ? ' (opcional)' : ''}
+      </label>
+      <FieldBox $invalid={!!error}>
+        <input
+          id={id}
+          aria-invalid={!!error}
+          aria-describedby={error || hint ? messageId : undefined}
+          {...props}
+        />
+        {optional && <OptionalTag aria-hidden>Opcional</OptionalTag>}
+      </FieldBox>
+      {error ? (
+        <ErrorMessage id={messageId} role="alert">
           {error}
-        </p>
+        </ErrorMessage>
+      ) : (
+        hint && (
+          <Hint id={messageId} aria-live="polite">
+            {hint}
+          </Hint>
+        )
       )}
-    </div>
+    </FieldContainer>
   )
 }
