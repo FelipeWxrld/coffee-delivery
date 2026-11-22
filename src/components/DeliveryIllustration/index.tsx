@@ -1,12 +1,16 @@
+import { useTheme } from 'styled-components'
+
 /** Ilustração original (SVG) de um entregador de scooter levando café. */
 export function DeliveryIllustration() {
+  const { colors } = useTheme()
+
   return (
     <svg viewBox="0 0 492 293" width="100%" style={{ maxWidth: 492 }} aria-hidden fill="none">
       {/* chão */}
-      <ellipse cx="246" cy="276" rx="220" ry="12" fill="var(--color-base-button)" />
+      <ellipse cx="246" cy="276" rx="220" ry="12" fill={colors.button} />
 
       {/* linhas de velocidade */}
-      <g stroke="var(--color-yellow)" strokeWidth="6" strokeLinecap="round">
+      <g stroke={colors.yellow} strokeWidth="6" strokeLinecap="round">
         <path d="M20 150h70" />
         <path d="M40 180h60" />
         <path d="M10 210h80" />
