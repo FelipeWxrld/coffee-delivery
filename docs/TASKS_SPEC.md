@@ -32,7 +32,7 @@ Legenda: ✅ concluída · ⏳ pendente.
 | T23 | Evidências visuais e README | — | `scripts/screenshots.mjs`, `docs/screenshots`, `README.md` | Home, Checkout, Sucesso, Dark e mobile no README | Revisão visual | `docs: …` | ✅ |
 | T24 | Registro de uso de IA (≥ 3 interações) | — | `docs/AI_USAGE.md`, `AGENTS.md` | Prompt, objetivo, resposta, decisão, evidência | Revisão | `docs: …` | ✅ |
 | T25 | Deploy na Vercel | RNF-07 | `vercel.json` | URL pública abre todas as rotas | `curl` 200 em `/` e `/checkout` | `docs: adiciona links…` | ✅ |
-| T26 | Deploy automático a cada push (integração GitHub ↔ Vercel) | RNF-07 | Vercel (configuração) | Push na `main` gera novo deploy | — | — | ⏳ requer conectar o GitHub na conta Vercel |
+| T26 | Deploy automático a cada push (integração GitHub ↔ Vercel) | RNF-07 | Vercel (configuração) | Push na `main` gera novo deploy | Push de teste gerou deploy automático | `docs: marca deploy automatico…` | ✅ |
 | T27 | Enviar links no Blackboard e preparar apresentação | — | — | Links enviados | — | — | ⏳ (aluno) |
 
 ## Backlog (desafios extras não implementados)
