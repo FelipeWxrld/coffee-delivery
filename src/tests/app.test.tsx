@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { STORAGE_KEYS } from '../utils/storage'
 import { renderApp } from './renderApp'
+import { coffees } from '../data/coffees'
 
 /** Simula o ViaCEP: um CEP existente, um inexistente e um que falha. */
 function mockViaCep() {
@@ -31,9 +32,9 @@ afterEach(() => {
 })
 
 describe('Home e catálogo', () => {
-  it('RF-01: exibe os 14 cafés com nome, descrição, preço e tags', () => {
+  it('RF-01: exibe todos os cafés do catálogo com nome, descrição, preço e tags', () => {
     renderApp()
-    expect(screen.getAllByRole('article')).toHaveLength(14)
+    expect(screen.getAllByRole('article')).toHaveLength(coffees.length)
     const latte = screen.getByRole('article', { name: 'Latte' })
     expect(within(latte).getByText(/o dobro de leite/i)).toBeInTheDocument()
     expect(within(latte).getByText('9,90')).toBeInTheDocument()
@@ -44,7 +45,7 @@ describe('Home e catálogo', () => {
     const user = userEvent.setup()
     renderApp()
     await user.click(screen.getByRole('button', { name: 'alcoólico' }))
-    expect(screen.getAllByRole('article')).toHaveLength(2)
+    expect(screen.getAllByRole('article')).toHaveLength(coffees.filter((c) => c.tags.includes('alcoólico')).length)
 
     await user.click(screen.getByRole('button', { name: 'alcoólico' }))
     await user.type(screen.getByLabelText(/buscar café/i), 'arabe')

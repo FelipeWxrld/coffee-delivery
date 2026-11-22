@@ -77,6 +77,29 @@ npm run dev        # http://localhost:5173
 
 Arquitetura completa em [docs/TECH_SPEC.md](docs/TECH_SPEC.md).
 
+## ☕ Como editar o catálogo
+
+Todos os cafés ficam em [`src/data/coffees.ts`](src/data/coffees.ts), um objeto por café:
+
+```ts
+{
+  id: 'latte',                        // único, sem espaços (vínculo com o carrinho salvo)
+  name: 'Latte',
+  description: 'Uma dose de café expresso com o dobro de leite e espuma cremosa',
+  tags: ['tradicional', 'com leite'], // 'tradicional' | 'especial' | 'com leite' | 'alcoólico' | 'gelado'
+  priceInCents: 990,                  // R$ 9,90 (sempre em centavos)
+  art: { liquid: '#9b6435', foam: '#f3e3cc', pattern: 'heart' }, // ilustração da xícara
+},
+```
+
+- **Preço:** altere `priceInCents` (R$ 12,50 → `1250`).
+- **Adicionar:** copie um objeto, use um `id` novo e único e ajuste os campos.
+- **Excluir:** apague o objeto. Carrinhos salvos com esse café são limpos automaticamente.
+- **Nova categoria:** adicione ao tipo `CoffeeTag` (`src/types/coffee.ts`) e a `FILTERS` (`src/components/CoffeeCatalog/index.tsx`).
+- **Frete:** `DELIVERY_FEE_IN_CENTS` em `src/utils/cart.ts`.
+
+Depois: `npm test`, commit, `git push` e novo deploy. Os testes leem a lista de cafés, então continuam válidos após a edição.
+
 ## 🗂️ Documentação
 
 | Documento | Conteúdo |
