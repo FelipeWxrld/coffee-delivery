@@ -1,5 +1,5 @@
 import { useId } from 'react'
-import type { CoffeeArt } from '../../@types/coffee'
+import type { CoffeeArt } from '../../types/coffee'
 
 interface CoffeeCupProps {
   art: CoffeeArt

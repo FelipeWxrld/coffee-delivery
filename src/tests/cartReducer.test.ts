@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Order } from '../../@types/coffee'
+import type { Order } from '../types/coffee'
 import {
   addItemAction,
   checkoutAction,
@@ -7,33 +7,34 @@ import {
   decrementItemAction,
   incrementItemAction,
   removeItemAction,
-} from './actions'
-import { cartReducer, initialCartState, isCartState, MAX_QUANTITY } from './reducer'
+} from '../reducers/cart/actions'
+import { cartReducer, initialCartState, isCartState } from '../reducers/cart/reducer'
+import { MAX_QUANTITY } from '../utils/cart'
 
 describe('cartReducer', () => {
-  it('adiciona um novo item ao carrinho', () => {
+  it('RF-03: adiciona um novo item ao carrinho', () => {
     const state = cartReducer(initialCartState, addItemAction('latte', 2))
     expect(state.items).toEqual([{ id: 'latte', quantity: 2 }])
   })
 
-  it('soma a quantidade quando o item já existe', () => {
+  it('RN-02: soma a quantidade quando o item já existe, sem duplicar linhas', () => {
     let state = cartReducer(initialCartState, addItemAction('latte', 2))
     state = cartReducer(state, addItemAction('latte', 3))
     expect(state.items).toEqual([{ id: 'latte', quantity: 5 }])
   })
 
-  it('ignora quantidades inválidas', () => {
-    const state = cartReducer(initialCartState, addItemAction('latte', 0))
+  it.each([0, -1, 1.5])('RN-01: ignora quantidade inválida na adição (%s)', (quantity) => {
+    const state = cartReducer(initialCartState, addItemAction('latte', quantity))
     expect(state).toBe(initialCartState)
   })
 
-  it(`não ultrapassa ${MAX_QUANTITY} unidades`, () => {
+  it(`não ultrapassa ${MAX_QUANTITY} unidades por item`, () => {
     let state = cartReducer(initialCartState, addItemAction('latte', MAX_QUANTITY))
     state = cartReducer(state, incrementItemAction('latte'))
     expect(state.items[0].quantity).toBe(MAX_QUANTITY)
   })
 
-  it('incrementa e decrementa sem ficar abaixo de 1', () => {
+  it('RN-01: incrementa e decrementa sem ficar abaixo de 1', () => {
     let state = cartReducer(initialCartState, addItemAction('latte', 1))
     state = cartReducer(state, incrementItemAction('latte'))
     expect(state.items[0].quantity).toBe(2)
@@ -42,15 +43,23 @@ describe('cartReducer', () => {
     expect(state.items[0].quantity).toBe(1)
   })
 
-  it('remove um item', () => {
+  it('RF-05: remove um item individualmente', () => {
     let state = cartReducer(initialCartState, addItemAction('latte', 1))
     state = cartReducer(state, addItemAction('cubano', 1))
     state = cartReducer(state, removeItemAction('latte'))
     expect(state.items).toEqual([{ id: 'cubano', quantity: 1 }])
   })
 
-  it('finaliza o pedido salvando-o e esvaziando o carrinho', () => {
-    const order = { id: '1' } as Order
+  it('não altera o estado anterior (imutabilidade)', () => {
+    const before = cartReducer(initialCartState, addItemAction('latte', 1))
+    const snapshot = structuredClone(before)
+    cartReducer(before, incrementItemAction('latte'))
+    cartReducer(before, removeItemAction('latte'))
+    expect(before).toEqual(snapshot)
+  })
+
+  it('RF-13: finaliza o pedido salvando o snapshot e esvaziando o carrinho', () => {
+    const order = { id: '1', items: [] } as unknown as Order
     let state = cartReducer(initialCartState, addItemAction('latte', 1))
     state = cartReducer(state, checkoutAction(order))
     expect(state.items).toHaveLength(0)
@@ -69,10 +78,14 @@ describe('isCartState', () => {
     expect(isCartState({ items: [{ id: 'latte', quantity: 1 }], lastOrder: null })).toBe(true)
   })
 
-  it.each([null, 'x', { items: 'x' }, { items: [{ id: 1, quantity: 1 }], lastOrder: null }, { items: [{ id: 'a', quantity: 0 }], lastOrder: null }])(
-    'rejeita dados corrompidos: %j',
-    (value) => {
-      expect(isCartState(value)).toBe(false)
-    },
-  )
+  it.each([
+    null,
+    'x',
+    { items: 'x' },
+    { items: [{ id: 1, quantity: 1 }], lastOrder: null },
+    { items: [{ id: 'a', quantity: 0 }], lastOrder: null },
+    { items: [], lastOrder: { id: 'sem-itens' } },
+  ])('rejeita dados corrompidos: %j', (value) => {
+    expect(isCartState(value)).toBe(false)
+  })
 })

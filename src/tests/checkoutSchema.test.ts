@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkoutSchema } from './checkout'
+import { checkoutSchema } from '../schemas/checkout'
 
 const valid = {
   cep: '01310-100',
@@ -12,8 +12,8 @@ const valid = {
   paymentMethod: 'credit',
 }
 
-describe('checkoutSchema', () => {
-  it('aceita dados válidos', () => {
+describe('checkoutSchema (RF-08, RF-09, RN-07)', () => {
+  it('aceita dados válidos com complemento vazio (opcional)', () => {
     expect(checkoutSchema.safeParse(valid).success).toBe(true)
   })
 
@@ -24,18 +24,22 @@ describe('checkoutSchema', () => {
   it.each([
     ['cep', '123', 'Informe um CEP válido (00000-000)'],
     ['street', '', 'Informe a rua'],
+    ['number', '', 'Informe o número'],
     ['number', 'abc', 'Use apenas números (ou S/N)'],
-    ['uf', 'XX', 'UF inválida'],
+    ['neighborhood', '', 'Informe o bairro'],
     ['city', '', 'Informe a cidade'],
-  ])('valida o campo %s', (field, value, message) => {
+    ['uf', 'XX', 'UF inválida'],
+  ])('valida o campo %s = "%s"', (field, value, message) => {
     const result = checkoutSchema.safeParse({ ...valid, [field]: value })
     expect(result.success).toBe(false)
     expect(result.error?.issues[0].message).toBe(message)
   })
 
-  it('exige forma de pagamento', () => {
-    const result = checkoutSchema.safeParse({ ...valid, paymentMethod: undefined })
-    expect(result.success).toBe(false)
-    expect(result.error?.issues[0].message).toBe('Selecione uma forma de pagamento')
+  it('exige uma forma de pagamento válida', () => {
+    for (const paymentMethod of [undefined, 'pix']) {
+      const result = checkoutSchema.safeParse({ ...valid, paymentMethod })
+      expect(result.success).toBe(false)
+      expect(result.error?.issues[0].message).toBe('Selecione uma forma de pagamento')
+    }
   })
 })

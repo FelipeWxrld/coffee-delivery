@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatCurrency, formatPrice, maskCep } from './format'
+import { formatCurrency, formatPrice, maskCep } from '../utils/format'
 
 describe('format utils', () => {
   it('formata centavos no padrão brasileiro', () => {

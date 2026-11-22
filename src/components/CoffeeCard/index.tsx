@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Check, ShoppingCartSimple } from '@phosphor-icons/react'
-import type { Coffee } from '../../@types/coffee'
+import type { Coffee } from '../../types/coffee'
 import { useCart } from '../../hooks/useCart'
-import { MAX_QUANTITY } from '../../reducers/cart/reducer'
+import { MAX_QUANTITY, MIN_QUANTITY } from '../../utils/cart'
 import { formatPrice } from '../../utils/format'
 import { CoffeeCup } from '../CoffeeCup'
 import { QuantityInput } from '../QuantityInput'
-import styles from './CoffeeCard.module.css'
+import { Actions, CardContainer, CartButton, Description, Footer, ImageWrapper, Name, Price, Tags } from './styles'
 
 interface CoffeeCardProps {
   coffee: Coffee
@@ -14,58 +14,60 @@ interface CoffeeCardProps {
 
 export function CoffeeCard({ coffee }: CoffeeCardProps) {
   const { addItem } = useCart()
-  const [quantity, setQuantity] = useState(1)
+  const [quantity, setQuantity] = useState(MIN_QUANTITY)
   const [justAdded, setJustAdded] = useState(false)
+  const timeoutRef = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => window.clearTimeout(timeoutRef.current), [])
 
   function handleAddToCart() {
     addItem(coffee.id, quantity)
-    setQuantity(1)
+    setQuantity(MIN_QUANTITY)
     setJustAdded(true)
-    window.setTimeout(() => setJustAdded(false), 1200)
+    window.clearTimeout(timeoutRef.current)
+    timeoutRef.current = window.setTimeout(() => setJustAdded(false), 1200)
   }
 
   return (
-    <article className={styles.card} aria-labelledby={`coffee-${coffee.id}`}>
-      <div className={styles.image}>
+    <CardContainer aria-labelledby={`coffee-${coffee.id}`}>
+      <ImageWrapper>
         <CoffeeCup art={coffee.art} label={coffee.name} />
-      </div>
+      </ImageWrapper>
 
-      <ul className={styles.tags} aria-label="Categorias">
+      <Tags aria-label="Categorias">
         {coffee.tags.map((tag) => (
           <li key={tag}>{tag}</li>
         ))}
-      </ul>
+      </Tags>
 
-      <h3 id={`coffee-${coffee.id}`}>{coffee.name}</h3>
-      <p className={styles.description}>{coffee.description}</p>
+      <Name id={`coffee-${coffee.id}`}>{coffee.name}</Name>
+      <Description>{coffee.description}</Description>
 
-      <footer className={styles.footer}>
-        <p className={styles.price}>
+      <Footer>
+        <Price>
           R$ <strong>{formatPrice(coffee.priceInCents)}</strong>
-        </p>
+        </Price>
 
-        <div className={styles.actions}>
+        <Actions>
           <QuantityInput
             quantity={quantity}
-            max={MAX_QUANTITY}
             label={`Quantidade de ${coffee.name}`}
             onIncrement={() => setQuantity((q) => Math.min(MAX_QUANTITY, q + 1))}
-            onDecrement={() => setQuantity((q) => Math.max(1, q - 1))}
+            onDecrement={() => setQuantity((q) => Math.max(MIN_QUANTITY, q - 1))}
           />
-          <button
+          <CartButton
             type="button"
-            className={`${styles.cartButton} ${justAdded ? styles.added : ''}`}
+            $added={justAdded}
             onClick={handleAddToCart}
             aria-label={`Adicionar ${coffee.name} ao carrinho`}
           >
-            {justAdded ? (
-              <Check size={22} weight="bold" />
-            ) : (
-              <ShoppingCartSimple size={22} weight="fill" />
-            )}
-          </button>
-        </div>
-      </footer>
-    </article>
+            {justAdded ? <Check size={22} weight="bold" /> : <ShoppingCartSimple size={22} weight="fill" />}
+          </CartButton>
+          <span className="sr-only" aria-live="polite">
+            {justAdded ? `${coffee.name} adicionado ao carrinho` : ''}
+          </span>
+        </Actions>
+      </Footer>
+    </CardContainer>
   )
 }
