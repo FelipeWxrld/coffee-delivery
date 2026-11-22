@@ -3,7 +3,7 @@
  * Uso: `npm run dev` em um terminal e `npm run screenshots` em outro.
  * Variáveis opcionais: BASE_URL (padrão http://localhost:5173) e BROWSER_PATH.
  */
-import { mkdir } from 'node:fs/promises'
+import { mkdir, readFile } from 'node:fs/promises'
 import puppeteer from 'puppeteer-core'
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:5173'
@@ -116,5 +116,22 @@ await shot('checkout-validation-errors', {
   action: (page) => page.click('button[type="submit"]'),
 })
 await shot('checkout-empty-cart', { viewport: DESKTOP, path: '/checkout', fullPage: false })
+
+// Prévia da logo para fundo escuro (usada no README)
+{
+  const page = await browser.newPage()
+  await page.setViewport({ width: 300, height: 100, deviceScaleFactor: 2 })
+  const svg = await readFile('src/assets/logo-dark.svg', 'utf8')
+  await page.setContent(
+    `<html><head><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap" rel="stylesheet"></head>
+     <body style="margin:0;background:#16120F;display:grid;place-items:center;height:100vh">
+     <div style="width:260px">${svg}</div></body></html>`,
+    { waitUntil: 'networkidle0' },
+  )
+  await page.evaluate(() => document.fonts.ready)
+  await page.screenshot({ path: `${OUT}/logo-dark-preview.png` })
+  await page.close()
+  console.log('✓ logo-dark-preview')
+}
 
 await browser.close()
