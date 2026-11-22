@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="__DEPLOY_URL__"><b>🔗 Acessar aplicação publicada</b></a>
+  <a href="https://coffee-delivery-taupe-seven.vercel.app"><b>🔗 Acessar aplicação publicada</b></a>
 </p>
 
 ---
@@ -40,7 +40,7 @@ React 19 · Vite 7 · TypeScript · React Router 7 · Context API · useReducer 
 Pré-requisito: **Node.js 20+**.
 
 ```bash
-git clone __REPO_URL__.git
+git clone https://github.com/FelipeWxrld/coffee-delivery.git
 cd coffee-delivery
 npm install
 npm run dev        # http://localhost:5173
